@@ -42,13 +42,26 @@ export function ProfileForm() {
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
   const [emailChangePending, setEmailChangePending] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // Seed form state once the profile loads.
   useEffect(() => {
     if (!profile) return;
-    setFullName(profile.full_name ?? '');
-    setEmail(profile.email ?? '');
-  }, [profile]);
+    if (!initialized) {
+      setFullName(profile.full_name ?? '');
+      setEmail(profile.email ?? '');
+      setInitialized(true);
+    } else {
+      const isDirty = fullName.trim() !== (profile.full_name ?? '') ||
+                      email.trim().toLowerCase() !== (profile.email ?? '').toLowerCase() ||
+                      pendingAvatar !== null ||
+                      removeAvatar;
+      if (!isDirty) {
+        setFullName(profile.full_name ?? '');
+        setEmail(profile.email ?? '');
+      }
+    }
+  }, [profile, initialized, fullName, email, pendingAvatar, removeAvatar]);
 
   // Cleanup object URLs to avoid leaks.
   useEffect(() => {

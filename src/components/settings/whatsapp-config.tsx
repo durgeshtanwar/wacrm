@@ -60,6 +60,7 @@ export function WhatsAppConfig() {
   const [verifyToken, setVerifyToken] = useState('');
   const [pin, setPin] = useState('');
   const [tokenEdited, setTokenEdited] = useState(false);
+  const [loadedAccountId, setLoadedAccountId] = useState<string | null>(null);
 
   // True once /register has succeeded on Meta's side (timestamp set
   // in the row). When false, the saved config is metadata-only and
@@ -148,6 +149,7 @@ export function WhatsAppConfig() {
         setResetReason(null);
         setStatusMessage('');
       }
+      setLoadedAccountId(acctId);
     } catch (err) {
       console.error('fetchConfig error:', err);
       toast.error('Failed to load WhatsApp configuration');
@@ -167,8 +169,10 @@ export function WhatsAppConfig() {
       setLoading(false);
       return;
     }
+    // Avoid redundant calls and form resets if we have already loaded configuration for this account
+    if (accountId === loadedAccountId) return;
     fetchConfig(accountId);
-  }, [authLoading, profileLoading, user, accountId, fetchConfig]);
+  }, [authLoading, profileLoading, user, accountId, fetchConfig, loadedAccountId]);
 
   async function handleSave() {
     if (!phoneNumberId.trim()) {
